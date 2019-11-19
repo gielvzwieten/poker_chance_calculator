@@ -35,16 +35,12 @@ class CardController extends Controller
     {
         $request->session()->regenerate();
 
-//        Put all shuffled cards to the session when a player picks a card
-        $cards = Card::all();
-        $cardsShuffled = $cards->shuffle()->toArray();
-        session()->put('shuffledCards', $cardsShuffled);
+//        Put all shuffled cards to the session when a user picks a card
+        session()->put('shuffledCards', Card::inRandomOrder()->get()->toArray());
 
-//        Put the picked card by user to the session
-        $playerCard = Card::find($request->card);
-        session()->put('userCard', $playerCard);
+//        Put picked card by user to the session
+        session()->put('userCard', Card::find($request->card));
 
-//        redirect back to the index
         return redirect()->route('card.index');
     }
 
@@ -56,27 +52,28 @@ class CardController extends Controller
      */
     public function update(Request $request, CalculateChanceOnNextDrawService $chanceOnNextDraw)
     {
-            $cardOnTopOfDeck = $request->session()->get('shuffledCards')[0]['id'];
-            $playerCard = $request->session()->get('userCard')->id;
+        $cardOnTopOfDeck = $request->session()->get('shuffledCards')[0]['id'];
 
-            if ($playerCard !== $cardOnTopOfDeck) {
+        $userCard = $request->session()->get('userCard')->id;
 
-                $request->session()->forget('shuffledCards.0');
-                $wholeDeck = $request->session()->get('shuffledCards');
+        if ($userCard !== $cardOnTopOfDeck) {
 
-                session()->put('shuffledCards', array_values($wholeDeck));
+            $request->session()->forget('shuffledCards.0');
+            $wholeDeck = $request->session()->get('shuffledCards');
 
-            } else {
+            session()->put('shuffledCards', array_values($wholeDeck));
 
-                $numberOfCardsLeftInDeck = count(request()->session()->get('shuffledCards'));
-                $chanceOnDrawingNextCard = $chanceOnNextDraw->calculate($numberOfCardsLeftInDeck);
+        } else {
 
-                session()->flash('message', 'You picked the right card! Your chance on picking this card was ' . $chanceOnDrawingNextCard . '%. Please pick a new card to start the game again' );
+            $numberOfCardsLeftInDeck = count(request()->session()->get('shuffledCards'));
+            $chanceOnDrawingNextCard = $chanceOnNextDraw->calculate($numberOfCardsLeftInDeck);
 
-                $request->session()->forget(['shuffledCards', 'userCard']);
-            }
+            session()->flash('message', 'You picked the right card! Your chance on picking this card was ' . $chanceOnDrawingNextCard . '%. Please pick a new card to start the game again' );
 
-            return redirect()->route('card.index');
+            $request->session()->forget(['shuffledCards', 'userCard']);
+        }
+
+        return redirect()->route('card.index');
     }
 
 }
