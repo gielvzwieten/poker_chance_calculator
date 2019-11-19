@@ -5,10 +5,10 @@ namespace App\Services;
 class CalculateChanceOnNextDrawService
 {
 
-    public function calculate($totalStartingCardsInDeck ,$numberOfCardsLeftInDeck)
+    public function calculate($numberOfCardsLeftInDeck)
     {
 
-        $chanceOnDrawingNextCard = ($totalStartingCardsInDeck + 1 - $numberOfCardsLeftInDeck) / $totalStartingCardsInDeck * 100;
+        $chanceOnDrawingNextCard = 1 / $numberOfCardsLeftInDeck * 100;
 
         return $chanceOnDrawingNextCard;
     }

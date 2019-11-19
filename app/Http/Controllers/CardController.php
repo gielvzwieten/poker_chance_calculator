@@ -8,10 +8,7 @@ use Illuminate\Http\Request;
 
 class CardController extends Controller
 {
-    private $totalStartingCardsInDeck = 52;
-    private function numberOfCardsLeftInDeck() {
-        return count(request()->session()->get('shuffledCards'));
-    }
+
     /**
      * Display a listing of the resource.
      *
@@ -22,10 +19,10 @@ class CardController extends Controller
         $cards = Card::all();
         if (session()->has('shuffledCards')){
 
-            $totalStartingCardsInDeck = $this->totalStartingCardsInDeck;
+//            $totalStartingCardsInDeck = $this->totalStartingCardsInDeck;
             $numberOfCardsLeftInDeck = $this->numberOfCardsLeftInDeck();
 
-            $chanceOnDrawingNextCard = $chanceOnNextDraw->calculate($totalStartingCardsInDeck, $numberOfCardsLeftInDeck);
+            $chanceOnDrawingNextCard = $chanceOnNextDraw->calculate($numberOfCardsLeftInDeck);
             return view('card.index', compact('cards', 'chanceOnDrawingNextCard', 'numberOfCardsLeftInDeck'));
 
         }
@@ -81,16 +78,19 @@ class CardController extends Controller
 
             } else {
 
-                $totalStartingCardsInDeck = $this->totalStartingCardsInDeck;
                 $numberOfCardsLeftInDeck = $this->numberOfCardsLeftInDeck();
 
-                $chanceOnDrawingNextCard = $chanceOnNextDraw->calculate($totalStartingCardsInDeck, $numberOfCardsLeftInDeck);
+                $chanceOnDrawingNextCard = $chanceOnNextDraw->calculate($numberOfCardsLeftInDeck);
 
                 session()->flash('message', 'You picked the right card! Your chance on picking this card was ' . $chanceOnDrawingNextCard . '%. Please pick a new card to start the game again' );
 
                 $request->session()->forget(['shuffledCards', 'userCard']);
             }
             return redirect()->route('card.index');
+    }
+
+    private function numberOfCardsLeftInDeck() {
+        return count(request()->session()->get('shuffledCards'));
     }
 
 }
