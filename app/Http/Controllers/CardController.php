@@ -35,6 +35,10 @@ class CardController extends Controller
     {
         $request->session()->regenerate();
 
+        $request->validate([
+            'card' => 'required|exists:cards,id'
+        ]);
+
 //        Put all shuffled cards to the session when a user picks a card
         session()->put('shuffledCards', Card::inRandomOrder()->get()->toArray());
 
@@ -52,6 +56,10 @@ class CardController extends Controller
      */
     public function update(Request $request, CalculateChanceOnNextDrawService $chanceOnNextDraw)
     {
+        $request->validate([
+            'card' => 'required|exists:cards,id'
+        ]);
+
         $cardOnTopOfDeck = $request->session()->get('shuffledCards')[0]['id'];
 
         $userCard = $request->session()->get('userCard')->id;
